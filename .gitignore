@@ -1,0 +1,4 @@
+*.exe
+*.7z
+*.o
+tools/sinlutgen.c
