@@ -302,7 +302,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				playerInput();
 				threedStuff();
 				
-					matrixSAngle.sy++;
+                matrixSAngle.sy++;
+				matrixSAngle.sx++;
 				time_accumulator -= timeStep;
 				cookedframecount++;
 			}
@@ -336,17 +337,17 @@ void initThreed(){
 }
 
 void threedStuff(){
-	matrixXX = lu_cos(matrixSAngle.sx) * lu_cos(matrixSAngle.sy);
-    matrixXY = lu_sin(matrixSAngle.sx) * lu_cos(matrixSAngle.sy);
-    matrixXZ = lu_sin(matrixSAngle.sy);
+	matrixXX = subpix_to_pix(lu_cos(matrixSAngle.sz) * lu_cos(matrixSAngle.sy));
+    matrixXY = subpix_to_pix(lu_sin(matrixSAngle.sz) * lu_cos(matrixSAngle.sy));
+    matrixXZ = subpix_to_pix(lu_sin(matrixSAngle.sy));
     
-    matrixYX = (lu_sin(matrixSAngle.sx) * lu_cos(matrixSAngle.sz)) + (lu_cos(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) + lu_sin(matrixSAngle.sz));
-    matrixYY = (-lu_cos(matrixSAngle.sx) * lu_cos(matrixSAngle.sz)) + (lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) + lu_sin(matrixSAngle.sz));
-    matrixYZ = -lu_cos(matrixSAngle.sy) * lu_sin(matrixSAngle.sz);
+    matrixYX = subpix_to_pix((lu_sin(matrixSAngle.sz) * lu_cos(matrixSAngle.sx)) + (lu_cos(matrixSAngle.sz) * lu_sin(matrixSAngle.sy) + lu_sin(matrixSAngle.sx)));
+    matrixYY = subpix_to_pix((-lu_cos(matrixSAngle.sz) * lu_cos(matrixSAngle.sx)) + (lu_sin(matrixSAngle.sz) * lu_sin(matrixSAngle.sy) + lu_sin(matrixSAngle.sx)));
+    matrixYZ = subpix_to_pix(-lu_cos(matrixSAngle.sy) * lu_sin(matrixSAngle.sx));
     
-    matrixZX = (lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sz)) - (lu_cos(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) + lu_cos(matrixSAngle.sz));
-    matrixZY = (-lu_cos(matrixSAngle.sx) * lu_cos(matrixSAngle.sz)) - (lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) + lu_sin(matrixSAngle.sz));
-    matrixZZ = lu_cos(matrixSAngle.sy) * lu_cos(matrixSAngle.sz);
+    matrixZX = subpix_to_pix((lu_sin(matrixSAngle.sz) * lu_sin(matrixSAngle.sx)) - (lu_cos(matrixSAngle.sz) * lu_sin(matrixSAngle.sy) + lu_cos(matrixSAngle.sx)));
+    matrixZY = subpix_to_pix((-lu_cos(matrixSAngle.sz) * lu_cos(matrixSAngle.sx)) - (lu_sin(matrixSAngle.sz) * lu_sin(matrixSAngle.sy) + lu_sin(matrixSAngle.sx)));
+    matrixZZ = subpix_to_pix(lu_cos(matrixSAngle.sy) * lu_cos(matrixSAngle.sx));
     
     matrixXX_XY = matrixXX*matrixXY;
     matrixYX_YY = matrixYX*matrixYY;
@@ -354,15 +355,25 @@ void threedStuff(){
 	
 	for (unsigned short i = 0; i < 8; i++){
         matrixX_m_Y = cube.x[i]*cube.y[i];
-		matrixPoints[i].x = subpix_to_pix((matrixXX+cube.y[i])*(matrixXY+cube.x[i]) + (cube.z[i] * matrixXX) - (matrixXX_XY + matrixX_m_Y));
-		matrixPoints[i].y = subpix_to_pix((matrixYX+cube.y[i])*(matrixYY+cube.x[i]) + (cube.z[i] * matrixYX) - (matrixYX_YY + matrixX_m_Y));
-		matrixPoints[i].z = subpix_to_pix((matrixZX+cube.y[i])*(matrixZY+cube.x[i]) + (cube.z[i] * matrixZX) - (matrixZX_ZY + matrixX_m_Y));
+        
+        matrixPoints[i].x = cube.x[i];
+        matrixPoints[i].y = cube.y[i];
+        matrixPoints[i].z = cube.z[i];
+        
+        matrixPoints[i].x = subpix_to_pix(matrixPoints[i].x + (cube.x[i] * lu_cos(matrixSAngle.sx) + cube.y[i] * lu_sin(matrixSAngle.sx)));
+        matrixPoints[i].y = subpix_to_pix(matrixPoints[i].y + (cube.x[i] * lu_sin(matrixSAngle.sx) - cube.y[i] * lu_cos(matrixSAngle.sx)));
+        
+		matrixPoints[i].x = subpix_to_pix(matrixPoints[i].x + (matrixPoints[i].x * lu_cos(matrixSAngle.sy) + cube.z[i] * lu_sin(matrixSAngle.sy)));
+        matrixPoints[i].z = subpix_to_pix(matrixPoints[i].z + (matrixPoints[i].x * lu_sin(matrixSAngle.sy) - cube.z[i] * lu_cos(matrixSAngle.sy)));
+        
+        matrixPoints[i].y = subpix_to_pix(matrixPoints[i].y + (matrixPoints[i].y * lu_cos(matrixSAngle.sz) + matrixPoints[i].z * lu_sin(matrixSAngle.sz)));
+        matrixPoints[i].z = subpix_to_pix(matrixPoints[i].z + (matrixPoints[i].y * lu_sin(matrixSAngle.sz) - matrixPoints[i].z * lu_cos(matrixSAngle.sz)));
 	}
 	
 	for (unsigned short i = 0; i < 8; i++){
 		if (subpix_to_pix(matrixPoints[i].z - cam.z) > 0){
-				projected[i].x = ((matrixPoints[i].x - cam.x) / subpix_to_pix(matrixPoints[i].z - cam.z)) + 64;
-				projected[i].y = (((matrixPoints[i].y - cam.y) / subpix_to_pix(matrixPoints[i].z - cam.z)) + 56) >> 1;
+				projected[i].x = (((matrixPoints[i].x) - cam.x) / subpix_to_pix(matrixPoints[i].z - cam.z)) + 64;
+				projected[i].y = ((((matrixPoints[i].y) - cam.y) / subpix_to_pix(matrixPoints[i].z - cam.z)) + 56) >> 1;
 		}
 	}
 }
@@ -450,7 +461,7 @@ void frameGraphics() {
 		
 		TextOutA(DeviceContext, 0, 32, debugTextBuffer, (int)strlen(debugTextBuffer));
 		
-		snprintf(debugTextBuffer, sizeof(debugTextBuffer), "Matrix SY: %d", matrixSAngle.sy);
+		snprintf(debugTextBuffer, sizeof(debugTextBuffer), "Cam Z: %d", cam.z);
 		
 		TextOutA(DeviceContext, 0, 48, debugTextBuffer, (int)strlen(debugTextBuffer));
 	}
