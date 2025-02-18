@@ -358,14 +358,9 @@ void threedStuff(){
         
         threedPoint matrixPrime[8];
         
-        matrixPrime[i].x = subpix_to_pix(cube.x[i] * lu_cos(matrixSAngle.sx) + cube.y[i] * lu_sin(matrixSAngle.sx));
-        matrixPrime[i].y = subpix_to_pix(cube.x[i] * lu_sin(matrixSAngle.sx) - cube.y[i] * lu_cos(matrixSAngle.sx));
-        
-		matrixPoints[i].x = subpix_to_pix(matrixPrime[i].x * lu_cos(matrixSAngle.sy) + cube.z[i] * lu_sin(matrixSAngle.sy));
-        matrixPrime[i].z = subpix_to_pix(matrixPrime[i].x * lu_sin(matrixSAngle.sy) - cube.z[i] * lu_cos(matrixSAngle.sy));
-        
-        matrixPoints[i].y = subpix_to_pix(matrixPrime[i].y * lu_cos(matrixSAngle.sz) + matrixPrime[i].z * lu_sin(matrixSAngle.sz));
-        matrixPoints[i].z = subpix_to_pix(matrixPrime[i].y * lu_sin(matrixSAngle.sz) - matrixPrime[i].z * lu_cos(matrixSAngle.sz));
+        matrixPoints[i].x = subpix_to_pix(cube.x[i] + (cube.x[i] * matrixXX + cube.y[i] * matrixXY + cube.z[i] * matrixXZ));
+        matrixPoints[i].y = subpix_to_pix(cube.y[i] + (cube.x[i] * matrixYX + cube.y[i] * matrixYY + cube.z[i] * matrixYZ));
+        matrixPoints[i].z = subpix_to_pix(cube.z[i] + (cube.x[i] * matrixZX + cube.y[i] * matrixZY + cube.z[i] * matrixZZ));
 	}
 	
 	for (unsigned short i = 0; i < 8; i++){
