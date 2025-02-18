@@ -303,7 +303,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				threedStuff();
 				
                 matrixSAngle.sy++;
-				matrixSAngle.sx++;
+				matrixSAngle.sz++;
 				time_accumulator -= timeStep;
 				cookedframecount++;
 			}
@@ -356,18 +356,16 @@ void threedStuff(){
 	for (unsigned short i = 0; i < 8; i++){
         matrixX_m_Y = cube.x[i]*cube.y[i];
         
-        matrixPoints[i].x = cube.x[i];
-        matrixPoints[i].y = cube.y[i];
-        matrixPoints[i].z = cube.z[i];
+        threedPoint matrixPrime[8];
         
-        matrixPoints[i].x = subpix_to_pix(matrixPoints[i].x + (cube.x[i] * lu_cos(matrixSAngle.sx) + cube.y[i] * lu_sin(matrixSAngle.sx)));
-        matrixPoints[i].y = subpix_to_pix(matrixPoints[i].y + (cube.x[i] * lu_sin(matrixSAngle.sx) - cube.y[i] * lu_cos(matrixSAngle.sx)));
+        matrixPrime[i].x = subpix_to_pix(cube.x[i] * lu_cos(matrixSAngle.sx) + cube.y[i] * lu_sin(matrixSAngle.sx));
+        matrixPrime[i].y = subpix_to_pix(cube.x[i] * lu_sin(matrixSAngle.sx) - cube.y[i] * lu_cos(matrixSAngle.sx));
         
-		matrixPoints[i].x = subpix_to_pix(matrixPoints[i].x + (matrixPoints[i].x * lu_cos(matrixSAngle.sy) + cube.z[i] * lu_sin(matrixSAngle.sy)));
-        matrixPoints[i].z = subpix_to_pix(matrixPoints[i].z + (matrixPoints[i].x * lu_sin(matrixSAngle.sy) - cube.z[i] * lu_cos(matrixSAngle.sy)));
+		matrixPoints[i].x = subpix_to_pix(matrixPrime[i].x * lu_cos(matrixSAngle.sy) + cube.z[i] * lu_sin(matrixSAngle.sy));
+        matrixPrime[i].z = subpix_to_pix(matrixPrime[i].x * lu_sin(matrixSAngle.sy) - cube.z[i] * lu_cos(matrixSAngle.sy));
         
-        matrixPoints[i].y = subpix_to_pix(matrixPoints[i].y + (matrixPoints[i].y * lu_cos(matrixSAngle.sz) + matrixPoints[i].z * lu_sin(matrixSAngle.sz)));
-        matrixPoints[i].z = subpix_to_pix(matrixPoints[i].z + (matrixPoints[i].y * lu_sin(matrixSAngle.sz) - matrixPoints[i].z * lu_cos(matrixSAngle.sz)));
+        matrixPoints[i].y = subpix_to_pix(matrixPrime[i].y * lu_cos(matrixSAngle.sz) + matrixPrime[i].z * lu_sin(matrixSAngle.sz));
+        matrixPoints[i].z = subpix_to_pix(matrixPrime[i].y * lu_sin(matrixSAngle.sz) - matrixPrime[i].z * lu_cos(matrixSAngle.sz));
 	}
 	
 	for (unsigned short i = 0; i < 8; i++){
