@@ -42,9 +42,9 @@ twodPoint projected[8];
 twodPoint oldProjected[8];
 
 typedef struct threedAngleMat {
-	unsigned char sx;
-	unsigned char sy;
-	unsigned char sz;
+	char sx;
+	char sy;
+	char sz;
 } threedAngleMat;
 
 const short initCamX = pix_to_subpix(0);
@@ -337,15 +337,15 @@ void initThreed(){
 
 void threedStuff(){
 	matrixXX = subpix_to_pix(lu_cos(matrixSAngle.sx) * lu_cos(matrixSAngle.sy));
-    matrixXY = subpix_to_pix(lu_sin(matrixSAngle.sx) * lu_cos(matrixSAngle.sy));
-    matrixXZ = subpix_to_pix(lu_sin(matrixSAngle.sy));
+    matrixXY = subpix_to_pix(-lu_sin(matrixSAngle.sx) * lu_cos(matrixSAngle.sy));
+    matrixXZ = (lu_sin(matrixSAngle.sy));
     
-    matrixYX = subpix_to_pix((lu_sin(matrixSAngle.sx) * lu_cos(matrixSAngle.sz)) + (lu_cos(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * lu_sin(matrixSAngle.sz)));
-    matrixYY = subpix_to_pix((-lu_cos(matrixSAngle.sx) * lu_cos(matrixSAngle.sz)) + (lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * lu_sin(matrixSAngle.sz)));
+    matrixYX = subpix_to_pix(lu_sin(matrixSAngle.sx) * lu_cos(matrixSAngle.sz)) + subpix_to_pix(lu_cos(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * subpix_to_pix(lu_sin(matrixSAngle.sz)));
+    matrixYY = subpix_to_pix(lu_cos(matrixSAngle.sx) * lu_cos(matrixSAngle.sz)) - subpix_to_pix(lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * subpix_to_pix(lu_sin(matrixSAngle.sz)));
     matrixYZ = subpix_to_pix(-lu_cos(matrixSAngle.sy) * lu_sin(matrixSAngle.sz));
     
-    matrixZX = subpix_to_pix((lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sz)) - (lu_cos(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * lu_cos(matrixSAngle.sz)));
-    matrixZY = subpix_to_pix((-lu_cos(matrixSAngle.sx) * lu_sin(matrixSAngle.sz)) - (lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * lu_cos(matrixSAngle.sz)));
+    matrixZX = subpix_to_pix(lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sz)) - subpix_to_pix(lu_cos(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * subpix_to_pix(lu_cos(matrixSAngle.sz)));
+    matrixZY = subpix_to_pix(lu_cos(matrixSAngle.sx) * lu_sin(matrixSAngle.sz)) + subpix_to_pix(lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * subpix_to_pix(lu_cos(matrixSAngle.sz)));
     matrixZZ = subpix_to_pix(lu_cos(matrixSAngle.sy) * lu_cos(matrixSAngle.sz));
     
     matrixXX_XY = matrixXX*matrixXY;
@@ -364,7 +364,7 @@ void threedStuff(){
 	
 	for (unsigned short i = 0; i < 8; i++){
 		if (subpix_to_pix(matrixPoints[i].z - cam.z) > 0){
-				projected[i].x = (((matrixPoints[i].x) - cam.x) / subpix_to_pix(matrixPoints[i].z - cam.z)) + 64;
+				projected[i].x = ((((matrixPoints[i].x) - cam.x) / subpix_to_pix(matrixPoints[i].z - cam.z)) + 64) >> 1;
 				projected[i].y = ((((matrixPoints[i].y) - cam.y) / subpix_to_pix(matrixPoints[i].z - cam.z)) + 56) >> 1;
 		}
 	}
