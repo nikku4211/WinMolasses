@@ -28,7 +28,7 @@ pixel32 debugBgPix = {0};
 
 threedPoint cam;
 
-short sin_lut[160];
+short sin_lut[288];
 
 //! Look-up a sine value
 static inline short lu_sin(unsigned char theta)
@@ -36,7 +36,7 @@ static inline short lu_sin(unsigned char theta)
 
 //! Look-up a cosine value
 static inline short lu_cos(unsigned char theta)
-{   return sin_lut[((theta+64)>>1)]; }
+{   return sin_lut[((theta+128)>>1)]; }
 
 twodPoint projected[8];
 twodPoint oldProjected[8];
@@ -88,37 +88,37 @@ uint32_t timeStep = 16;
 
 static inline int64_t GetTicks()
 {
-    LARGE_INTEGER ticks;
+	LARGE_INTEGER ticks;
 
-    if (!QueryPerformanceCounter(&ticks))
-    {
-        // FIXME: GetTickCount() has the 49.7 days limitation,
-        // we could try to work around that somehow
-        return GetTickCount();
-    }
+	if (!QueryPerformanceCounter(&ticks))
+	{
+		// FIXME: GetTickCount() has the 49.7 days limitation,
+		// we could try to work around that somehow
+		return GetTickCount();
+	}
 
-    return ticks.QuadPart;
+	return ticks.QuadPart;
 }
 
 uint32_t
 gvm_platform_now_ms()
 {
-    static bool initial = true;
-    static int64_t ts0;
+	static bool initial = true;
+	static int64_t ts0;
 
-    LARGE_INTEGER frequency;
-    if (!QueryPerformanceFrequency(&frequency)) {
-        frequency.QuadPart = 1000;
-    }
+	LARGE_INTEGER frequency;
+	if (!QueryPerformanceFrequency(&frequency)) {
+		frequency.QuadPart = 1000;
+	}
 
-    if (initial) {
-        initial = false;
-        ts0 = GetTicks();
-    }
+	if (initial) {
+		initial = false;
+		ts0 = GetTicks();
+	}
 
-    int64_t ts = GetTicks();
+	int64_t ts = GetTicks();
 
-    return 1000 * (ts - ts0) / frequency.QuadPart;
+	return 1000 * (ts - ts0) / frequency.QuadPart;
 }
 
 // Step 4: the Window Procedure
@@ -126,15 +126,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 		FARPROC proc;
 		WORD cmd;
-    switch(msg)
-    {
-        case WM_CLOSE:
-            DestroyWindow(hwnd);
-        break;
-        case WM_DESTROY:
+	switch(msg)
+	{
+		case WM_CLOSE:
+			DestroyWindow(hwnd);
+		break;
+		case WM_DESTROY:
 						gGameRunning = FALSE;
-            PostQuitMessage(0);
-        break;
+			PostQuitMessage(0);
+		break;
 				case WM_COMMAND:
 						cmd = LOWORD( wParam );
 						switch( cmd ) {
@@ -175,77 +175,77 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 							break;
 						}
 				break;
-        default:
-            return DefWindowProc(hwnd, msg, wParam, lParam);
-    }
-    return 0;
+		default:
+			return DefWindowProc(hwnd, msg, wParam, lParam);
+	}
+	return 0;
 }
 
 BOOL WINAPI WinAbout( HWND window_handle, UINT msg, WPARAM wparam, LPARAM)
 {
-    window_handle = window_handle;
+	window_handle = window_handle;
 
-    switch( msg ) {
-    case WM_INITDIALOG:
-        return( TRUE );
-    case WM_COMMAND:
-        if( LOWORD( wparam ) == IDOK ) {
-            EndDialog( window_handle, TRUE );
-            return( TRUE );
-        }
-        break;
-    }
-    return( FALSE );
+	switch( msg ) {
+	case WM_INITDIALOG:
+		return( TRUE );
+	case WM_COMMAND:
+		if( LOWORD( wparam ) == IDOK ) {
+			EndDialog( window_handle, TRUE );
+			return( TRUE );
+		}
+		break;
+	}
+	return( FALSE );
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
-    LPSTR lpCmdLine, int nCmdShow)
+	LPSTR lpCmdLine, int nCmdShow)
 {
 	
 		time_last = gvm_platform_now_ms();
 	
-    WNDCLASSEX wc;
-    
-    MSG Msg;
+	WNDCLASSEX wc;
+	
+	MSG Msg;
 
 		border_thickness = GetSystemMetrics(SM_CXSIZEFRAME);
 
-    //Step 1: Registering the Window Class
-    wc.cbSize        = sizeof(WNDCLASSEX);
-    wc.style         = 0;
-    wc.lpfnWndProc   = WndProc;
-    wc.cbClsExtra    = 0;
-    wc.cbWndExtra    = 0;
-    wc.hInstance     = hInstance;
-    wc.hIcon         = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(GenericIcon));;
+	//Step 1: Registering the Window Class
+	wc.cbSize        = sizeof(WNDCLASSEX);
+	wc.style         = 0;
+	wc.lpfnWndProc   = WndProc;
+	wc.cbClsExtra    = 0;
+	wc.cbWndExtra    = 0;
+	wc.hInstance     = hInstance;
+	wc.hIcon         = LoadIcon(GetModuleHandle(NULL), MAKEINTRESOURCE(GenericIcon));;
 		wc.hIconSm       = (HICON)LoadImage(GetModuleHandle(NULL), MAKEINTRESOURCE(GenericIcon), IMAGE_ICON, 16, 16, 0);
-    wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
-    wc.lpszMenuName  = MAKEINTRESOURCE(GenericMenu);
-    wc.lpszClassName = g_szClassName;
+	wc.hCursor       = LoadCursor(NULL, IDC_ARROW);
+	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW+1);
+	wc.lpszMenuName  = MAKEINTRESOURCE(GenericMenu);
+	wc.lpszClassName = g_szClassName;
 
-    if(!RegisterClassEx(&wc))
-    {
-        MessageBox(NULL, "Window Registration Failed!", "Error!",
-            MB_ICONEXCLAMATION | MB_OK);
-        return 0;
-    }
+	if(!RegisterClassEx(&wc))
+	{
+		MessageBox(NULL, "Window Registration Failed!", "Error!",
+			MB_ICONEXCLAMATION | MB_OK);
+		return 0;
+	}
 
-    // Step 2: Creating the Window
-    hwnd = CreateWindowEx(
-        WS_EX_CLIENTEDGE,
-        g_szClassName,
-        game_name,
-        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_BORDER | WS_MINIMIZEBOX,
-        CW_USEDEFAULT, CW_USEDEFAULT, game_res_width, game_res_height,
-        NULL, NULL, hInstance, NULL);
+	// Step 2: Creating the Window
+	hwnd = CreateWindowEx(
+		WS_EX_CLIENTEDGE,
+		g_szClassName,
+		game_name,
+		WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_BORDER | WS_MINIMIZEBOX,
+		CW_USEDEFAULT, CW_USEDEFAULT, game_res_width, game_res_height,
+		NULL, NULL, hInstance, NULL);
 
-    if(hwnd == NULL)
-    {
-        MessageBox(NULL, "Window creation failed!", "Error!",
-            MB_ICONEXCLAMATION | MB_OK);
-        return 0;
-    }
+	if(hwnd == NULL)
+	{
+		MessageBox(NULL, "Window creation failed!", "Error!",
+			MB_ICONEXCLAMATION | MB_OK);
+		return 0;
+	}
 
 		scaled_game_multiplier = 1;
 		scaled_game_width = game_res_width*scaled_game_multiplier*2;
@@ -253,8 +253,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 
 		SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, scaled_game_width + border_thickness, scaled_game_height + border_thickness, SWP_NOMOVE);
 
-    ShowWindow(hwnd, nCmdShow);
-    UpdateWindow(hwnd);
+	ShowWindow(hwnd, nCmdShow);
+	UpdateWindow(hwnd);
 		
 		gBackBuffer.bitmap_info.bmiHeader.biSize = sizeof(gBackBuffer.bitmap_info.bmiHeader);
 		
@@ -270,7 +270,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		
 		if (gBackBuffer.memory == NULL) {
 			MessageBox(NULL, "Drawing area creation failed!", "Error!",
-            MB_ICONEXCLAMATION | MB_OK);
+			MB_ICONEXCLAMATION | MB_OK);
 			return(0);
 		}
 		
@@ -302,17 +302,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 				playerInput();
 				threedStuff();
 				
-                matrixSAngle.sy++;
+				matrixSAngle.sy++;
 				time_accumulator -= timeStep;
 				cookedframecount++;
 			}
-      
+	  
 			frameGraphics();
 			
 			gPerformanceData.total_frames_rendered++;
 			time_last = time_now;
-    }
-    return Msg.wParam;
+	}
+	return Msg.wParam;
 }
 
 void initTrig(){
@@ -337,34 +337,34 @@ void initThreed(){
 
 void threedStuff(){
 	matrixXX = subpix_to_pix(lu_cos(matrixSAngle.sx) * lu_cos(matrixSAngle.sy));
-    matrixXY = subpix_to_pix(-lu_sin(matrixSAngle.sx) * lu_cos(matrixSAngle.sy));
-    matrixXZ = (lu_sin(matrixSAngle.sy));
-    
-    matrixYX = subpix_to_pix(lu_sin(matrixSAngle.sx) * lu_cos(matrixSAngle.sz)) + subpix_to_pix(lu_cos(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * subpix_to_pix(lu_sin(matrixSAngle.sz)));
-    matrixYY = subpix_to_pix(lu_cos(matrixSAngle.sx) * lu_cos(matrixSAngle.sz)) - subpix_to_pix(lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * subpix_to_pix(lu_sin(matrixSAngle.sz)));
-    matrixYZ = subpix_to_pix(-lu_cos(matrixSAngle.sy) * lu_sin(matrixSAngle.sz));
-    
-    matrixZX = subpix_to_pix(lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sz)) - subpix_to_pix(lu_cos(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * subpix_to_pix(lu_cos(matrixSAngle.sz)));
-    matrixZY = subpix_to_pix(lu_cos(matrixSAngle.sx) * lu_sin(matrixSAngle.sz)) + subpix_to_pix(lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * subpix_to_pix(lu_cos(matrixSAngle.sz)));
-    matrixZZ = subpix_to_pix(lu_cos(matrixSAngle.sy) * lu_cos(matrixSAngle.sz));
-    
-    matrixXX_XY = matrixXX*matrixXY;
-    matrixYX_YY = matrixYX*matrixYY;
-    matrixZX_ZY = matrixZX*matrixZY;
+	matrixXY = subpix_to_pix(-lu_sin(matrixSAngle.sx) * lu_cos(matrixSAngle.sy));
+	matrixXZ = (lu_sin(matrixSAngle.sy));
+	
+	matrixYX = subpix_to_pix(lu_sin(matrixSAngle.sx) * lu_cos(matrixSAngle.sz)) + subpix_to_pix(lu_cos(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * subpix_to_pix(lu_sin(matrixSAngle.sz)));
+	matrixYY = subpix_to_pix(lu_cos(matrixSAngle.sx) * lu_cos(matrixSAngle.sz)) - subpix_to_pix(lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * subpix_to_pix(lu_sin(matrixSAngle.sz)));
+	matrixYZ = subpix_to_pix(-lu_cos(matrixSAngle.sy) * lu_sin(matrixSAngle.sz));
+	
+	matrixZX = subpix_to_pix(lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sz)) - subpix_to_pix(lu_cos(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * subpix_to_pix(lu_cos(matrixSAngle.sz)));
+	matrixZY = subpix_to_pix(lu_cos(matrixSAngle.sx) * lu_sin(matrixSAngle.sz)) + subpix_to_pix(lu_sin(matrixSAngle.sx) * lu_sin(matrixSAngle.sy) * subpix_to_pix(lu_cos(matrixSAngle.sz)));
+	matrixZZ = subpix_to_pix(lu_cos(matrixSAngle.sy) * lu_cos(matrixSAngle.sz));
+	
+	matrixXX_XY = (matrixXX*matrixXY);
+	matrixYX_YY = (matrixYX*matrixYY);
+	matrixZX_ZY = (matrixZX*matrixZY);
 	
 	for (unsigned short i = 0; i < 8; i++){
-        matrixX_m_Y = cube.x[i]*cube.y[i];
-        
-        threedPoint matrixPrime[8];
-        
-        matrixPoints[i].x = subpix_to_pix(cube.x[i] + (cube.x[i] * matrixXX + cube.y[i] * matrixXY + cube.z[i] * matrixXZ));
-        matrixPoints[i].y = subpix_to_pix(cube.y[i] + (cube.x[i] * matrixYX + cube.y[i] * matrixYY + cube.z[i] * matrixYZ));
-        matrixPoints[i].z = subpix_to_pix(cube.z[i] + (cube.x[i] * matrixZX + cube.y[i] * matrixZY + cube.z[i] * matrixZZ));
+		matrixX_m_Y = (cube.x[i]*cube.y[i]);
+		
+		threedPoint matrixPrime[8];
+		
+		matrixPoints[i].x = (cube.x[i]) + ((matrixXX + cube.y[i]) * (matrixXY + cube.x[i])) + subpix_to_pix(cube.z[i] * matrixXZ) - (matrixXX_XY + matrixX_m_Y);
+		matrixPoints[i].y = (cube.y[i]) + ((matrixYX + cube.y[i]) * (matrixYY + cube.x[i])) + subpix_to_pix(cube.z[i] * matrixYZ) - (matrixYX_YY + matrixX_m_Y);
+		matrixPoints[i].z = (cube.z[i]) + ((matrixZX + cube.y[i]) * (matrixZY + cube.x[i])) + subpix_to_pix(cube.z[i] * matrixZZ) - (matrixZX_ZY + matrixX_m_Y);
 	}
 	
 	for (unsigned short i = 0; i < 8; i++){
 		if (subpix_to_pix(matrixPoints[i].z - cam.z) > 0){
-				projected[i].x = ((((matrixPoints[i].x) - cam.x) / subpix_to_pix(matrixPoints[i].z - cam.z)) + 64) >> 1;
+				projected[i].x = (((matrixPoints[i].x) - cam.x) / subpix_to_pix(matrixPoints[i].z - cam.z)) + 64;
 				projected[i].y = ((((matrixPoints[i].y) - cam.y) / subpix_to_pix(matrixPoints[i].z - cam.z)) + 56) >> 1;
 		}
 	}
@@ -449,13 +449,21 @@ void frameGraphics() {
 		
 		TextOutA(DeviceContext, 0, 16, debugTextBuffer, (int)strlen(debugTextBuffer));
 		
-		snprintf(debugTextBuffer, sizeof(debugTextBuffer), "Matrix Point 0 Z: %d", matrixPoints[0].z);
+		snprintf(debugTextBuffer, sizeof(debugTextBuffer), "Matrix XX*XY: %d", matrixXX_XY);
 		
 		TextOutA(DeviceContext, 0, 32, debugTextBuffer, (int)strlen(debugTextBuffer));
 		
-		snprintf(debugTextBuffer, sizeof(debugTextBuffer), "Matrix ZX: %d", matrixZX);
+		snprintf(debugTextBuffer, sizeof(debugTextBuffer), "Matrix ZX*ZY: %d", matrixZX_ZY);
 		
 		TextOutA(DeviceContext, 0, 48, debugTextBuffer, (int)strlen(debugTextBuffer));
+        
+        snprintf(debugTextBuffer, sizeof(debugTextBuffer), "Cam Y: %d", cam.y);
+		
+		TextOutA(DeviceContext, 0, 64, debugTextBuffer, (int)strlen(debugTextBuffer));
+		
+		snprintf(debugTextBuffer, sizeof(debugTextBuffer), "Cam X: %d", cam.x);
+		
+		TextOutA(DeviceContext, 0, 80, debugTextBuffer, (int)strlen(debugTextBuffer));
 	}
 	
 	ReleaseDC(hwnd, DeviceContext);

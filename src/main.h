@@ -45,8 +45,8 @@ typedef struct performance_data {
 
 #define calculate_avg_fps_after_x_frames 60
 
-#define pix_to_subpix(n) ((n) << 8)
-#define subpix_to_pix(n) ((n) >> 8)
+#define pix_to_subpix(n) ((n) * 256)
+#define subpix_to_pix(n) ((n) / 256)
 
 #define M_PI 3.1415926535f
 #define SIN_SIZE 128
