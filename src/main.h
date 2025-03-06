@@ -49,7 +49,7 @@ typedef struct performance_data {
 #define subpix_to_pix(n) ((n) >> 8)
 
 #define M_PI 3.1415926535f
-#define SIN_SIZE 128
+#define SIN_SIZE 256
 #define SIN_FP 7
 
 typedef struct threedPoint {
